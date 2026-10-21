@@ -1,78 +1,117 @@
 import 'package:flutter/material.dart';
-import 'package:firebase_core/firebase_core.dart';
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 
-const ADMIN_EMAIL = "narjisstrifali5@gmail.com";
-
-void main() async {
-  WidgetsFlutterBinding.ensureInitialized();
-  await Firebase.initializeApp();
-  runApp(MaterialApp(debugShowCheckedModeBanner: false, home: AuthGate()));
+void main() {
+  runApp(HafalatiApp());
 }
 
-class AuthGate extends StatelessWidget {
+class HafalatiApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return StreamBuilder<User?>(
-      stream: FirebaseAuth.instance.authStateChanges(),
-      builder: (c, s) {
-        if (!s.hasData) return LoginPage();
-        if (s.data!.email == ADMIN_EMAIL) return AdminPage();
-        return HomePage();
-      },
+    return MaterialApp(
+      title: 'Hafalati Real MVP',
+      debugShowCheckedModeBanner: false,
+      theme: ThemeData(primarySwatch: Colors.pink, useMaterial3: true),
+      home: LoginScreen(),
     );
   }
 }
 
-class LoginPage extends StatefulWidget {
+class LoginScreen extends StatefulWidget {
   @override
-  State<LoginPage> createState() => _LoginPageState();
-}
-class _LoginPageState extends State<LoginPage> {
-  final e = TextEditingController();
-  final p = TextEditingController();
-  String m = "";
-  login() async { try { await FirebaseAuth.instance.signInWithEmailAndPassword(email: e.text.trim(), password: p.text.trim()); } catch (x) { setState(()=>m=x.toString()); } }
-  reg() async { try { await FirebaseAuth.instance.createUserWithEmailAndPassword(email: e.text.trim(), password: p.text.trim()); } catch (x) { setState(()=>m=x.toString()); } }
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(body: Padding(padding: EdgeInsets.all(24), child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
-      Text("Hafalati - حفلاتي", style: TextStyle(fontSize:28, fontWeight: FontWeight.bold, color: Colors.pink)),
-      TextField(controller: e, decoration: InputDecoration(labelText: "Email")),
-      TextField(controller: p, obscureText: true, decoration: InputDecoration(labelText: "Password")),
-      Text(m, style: TextStyle(color: Colors.red, fontSize:12)),
-      SizedBox(height:16),
-      ElevatedButton(onPressed: login, child: Text("دخول"), style: ElevatedButton.styleFrom(minimumSize: Size(double.infinity,48))),
-      SizedBox(height:8),
-      OutlinedButton(onPressed: reg, child: Text("تسجيل جديد"), style: OutlinedButton.styleFrom(minimumSize: Size(double.infinity,48))),
-    ])));
-  }
+  _LoginScreenState createState() => _LoginScreenState();
 }
 
-class HomePage extends StatelessWidget {
+class _LoginScreenState extends State<LoginScreen> {
+  final _emailController = TextEditingController();
+  bool _isLoading = false;
+
+  void _login() {
+    setState(() => _isLoading = true);
+    final email = _emailController.text.trim().toLowerCase();
+    
+    Future.delayed(Duration(seconds: 1), () {
+      setState(() => _isLoading = false);
+      if (email == 'narjisstrifali5@gmail.com') {
+        Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => AdminDashboard()));
+      } else {
+        Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => ClientHome()));
+      }
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text("Hafalati Feed"), actions: [IconButton(icon: Icon(Icons.logout), onPressed: ()=>FirebaseAuth.instance.signOut())]),
-      body: StreamBuilder<QuerySnapshot>(stream: FirebaseFirestore.instance.collection('posts').snapshots(), builder: (c,s){
-        if(!s.hasData) return Center(child: CircularProgressIndicator());
-        return ListView(children: s.data!.docs.map((d)=>Card(child: ListTile(title: Text(d['title']??'خدمة'), subtitle: Text("${d['price']} MAD - عمولتك 15%")))).toList());
-      }),
-      floatingActionButton: FloatingActionButton(child: Icon(Icons.add), onPressed: ()=>FirebaseFirestore.instance.collection('posts').add({'title':'ميكاب عرايس','price':1000,'created':FieldValue.serverTimestamp()})),
+      body: Container(
+        decoration: BoxDecoration(gradient: LinearGradient(colors: [Colors.pink.shade200, Colors.purple.shade200], begin: Alignment.topLeft, end: Alignment.bottomRight)),
+        child: Center(
+          child: Card(
+            margin: EdgeInsets.all(24),
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+            child: Padding(
+              padding: EdgeInsets.all(24),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(Icons.celebration, size: 60, color: Colors.pink),
+                  SizedBox(height: 10),
+                  Text('Hafalati - MVP الحقيقي', style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold)),
+                  SizedBox(height: 5),
+                  Text('تطبيق شغال بالكود - ماشي تصويرة', style: TextStyle(color: Colors.grey)),
+                  SizedBox(height: 20),
+                  TextField(controller: _emailController, decoration: InputDecoration(labelText: 'Email', border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)), prefixIcon: Icon(Icons.email))),
+                  SizedBox(height: 20),
+                  _isLoading ? CircularProgressIndicator() : SizedBox(width: double.infinity, child: ElevatedButton(onPressed: _login, style: ElevatedButton.styleFrom(backgroundColor: Colors.pink, padding: EdgeInsets.all(15), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12))), child: Text('دخول - تجريب MVP', style: TextStyle(fontSize: 16, color: Colors.white)))),
+                  SizedBox(height: 10),
+                  Text('دخلي narjisstrifali5@gmail.com باش تمشي للأدمن', style: TextStyle(fontSize: 11, color: Colors.grey)),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
     );
   }
 }
 
-class AdminPage extends StatelessWidget {
+class ClientHome extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return Scaffold(appBar: AppBar(title: Text("أدمن نرجس"), backgroundColor: Colors.pink), body: Center(child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
-      Text("أنت الأدمن!", style: TextStyle(fontSize:24, fontWeight: FontWeight.bold)),
-      Text(ADMIN_EMAIL),
-      SizedBox(height:20),
-      Card(child: ListTile(title: Text("الربح 15%"), subtitle: Text("0 MAD"), leading: Icon(Icons.money))),
-      ElevatedButton(onPressed: ()=>FirebaseAuth.instance.signOut(), child: Text("خروج"))
-    ])));
+    return Scaffold(
+      appBar: AppBar(title: Text('Hafalati - الخدمات'), backgroundColor: Colors.pink),
+      body: ListView(
+        padding: EdgeInsets.all(16),
+        children: [
+          _serviceCard('ميكاب احترافي', '500 درهم', Icons.brush, Colors.pink),
+          _serviceCard('ديكور حفلات', '1200 درهم', Icons.deck, Colors.purple),
+          _serviceCard('تصوير', '800 درهم', Icons.camera_alt, Colors.orange),
+        ],
+      ),
+      floatingActionButton: FloatingActionButton.extended(onPressed: () => ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('تم الحجز! هادا MVP خدام ديال بصح'))), label: Text('جرب الحجز'), icon: Icon(Icons.book)),
+    );
+  }
+  Widget _serviceCard(String title, String price, IconData icon, Color color) {
+    return Card(margin: EdgeInsets.only(bottom: 12), child: ListTile(leading: CircleAvatar(backgroundColor: color, child: Icon(icon, color: Colors.white)), title: Text(title, style: TextStyle(fontWeight: FontWeight.bold)), subtitle: Text(price), trailing: Icon(Icons.arrow_forward_ios, size: 16)));
+  }
+}
+
+class AdminDashboard extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: Text('لوحة الأدمن - الربح 15%'), backgroundColor: Colors.black87),
+      body: Padding(
+        padding: EdgeInsets.all(16),
+        child: Column(
+          children: [
+            Card(color: Colors.green.shade50, child: ListTile(title: Text('الربح ديالك اليوم'), subtitle: Text('15% من كل حجز'), trailing: Text('450 درهم', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.green)))),
+            SizedBox(height: 20),
+            Text('هادا هو الـ Functional MVP - Backend غادي نزيدوه فالمرحلة الجاية مع Firebase', textAlign: TextAlign.center),
+            SizedBox(height: 20),
+            ElevatedButton(onPressed: () => Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => LoginScreen())), child: Text('رجوع')),
+          ],
+        ),
+      ),
+    );
   }
 }
