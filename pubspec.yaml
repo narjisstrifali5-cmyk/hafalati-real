@@ -1,14 +1,23 @@
 name: hafalati_real
-description: Hafalati - Admin narjisstrifali5@gmail.com
+description: Hafalati - Real Functional MVP with Backend
 publish_to: 'none'
 version: 1.0.0+1
+
 environment:
-  sdk: ">=3.0.0 <4.0.0"
+  sdk: '>=3.0.0 <4.0.0'
+
 dependencies:
   flutter:
     sdk: flutter
-  firebase_core: ^2.24.2
-  firebase_auth: ^4.15.3
-  cloud_firestore: ^4.15.5
+  cupertino_icons: ^1.0.5
+  firebase_core: ^2.24.0
+  firebase_auth: ^4.11.1
+  cloud_firestore: ^4.15.0
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^3.0.0
+
 flutter:
   uses-material-design: true
