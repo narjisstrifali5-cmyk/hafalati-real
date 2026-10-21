@@ -1,5 +1,5 @@
 name: hafalati_real
-description: Hafalati - Real Functional MVP with Backend
+description: Hafalati Real MVP Functional
 publish_to: 'none'
 version: 1.0.0+1
 
@@ -10,9 +10,6 @@ dependencies:
   flutter:
     sdk: flutter
   cupertino_icons: ^1.0.5
-  firebase_core: ^2.24.0
-  firebase_auth: ^4.11.1
-  cloud_firestore: ^4.15.0
 
 dev_dependencies:
   flutter_test:
