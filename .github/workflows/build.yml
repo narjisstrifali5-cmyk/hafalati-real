@@ -13,8 +13,11 @@ jobs:
         with:
           flutter-version: '3.19.0'
           channel: 'stable'
-      - run: flutter create . --platforms=android
       - run: flutter pub get
+      - run: |
+          if [ ! -d "android" ]; then
+            flutter create --platforms=android --project-name hafalati_real .
+          fi
       - run: flutter build apk --release --no-tree-shake-icons
       - uses: actions/upload-artifact@v4
         with:
